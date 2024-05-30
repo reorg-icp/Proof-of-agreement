@@ -47,8 +47,8 @@ mod tests {
         "Thou shalt not covet thy neighbour's wife, nor his manservant, nor his maidservant, nor his ox, nor his ass, nor any thing that is thy neighbour's".to_string(),
     ];
         let agreement = _create_new_agreement(terms, String::from("God"));
-        let amschel_agrees = _agree_to_agreement(String::from("God"), agreement);
-        dbg!(amschel_agrees.proof_of_agreement);
+
+        dbg!(agreement.proof_of_agreement.unwrap().0.unwrap().value);
     }
     #[test]
     fn _agree_to_agreement_works() {}
