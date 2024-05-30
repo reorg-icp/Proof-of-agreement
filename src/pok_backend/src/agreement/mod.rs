@@ -1,6 +1,6 @@
 use crate::signature::Signature;
 use crate::user::User;
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Agreement {
     pub terms: Vec<String>,
     pub by_user: User,

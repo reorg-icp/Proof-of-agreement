@@ -8,13 +8,13 @@ mod signature;
 mod user;
 
 impl ToUser for Principal {
-    fn principal_to_user(self) -> User {
-        User { identity: self }
+    fn principal_to_user(name: String) -> User {
+        User { identity: name }
     }
 }
 
-fn _create_new_agreement(terms: Vec<String>, with_user: Principal) -> Agreement {
-    let creator = Principal::principal_to_user(ic_cdk::caller());
+fn _create_new_agreement(terms: Vec<String>, with_user: String) -> Agreement {
+    let creator = Principal::principal_to_user(String::from("aMSCHEL"));
 
     let agreement = creator.clone().new_agreement(
         terms,
@@ -23,7 +23,32 @@ fn _create_new_agreement(terms: Vec<String>, with_user: Principal) -> Agreement 
     );
     creator.agree(agreement)
 }
-fn _agree_to_agreement(user: Principal, agreement: Agreement) -> Agreement {
+fn _agree_to_agreement(user: String, agreement: Agreement) -> Agreement {
     let agreeing_party = Principal::principal_to_user(user);
     agreeing_party.agree(agreement)
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn agreement_btwn_god_and_man() {
+        let terms: Vec<String> = vec![
+        "I am the Lord thy God".to_string(),
+        "Thou shalt have no other gods before me".to_string(),
+        "Thou shalt not make unto thee any graven image".to_string(),
+        "Thou shalt not take the name of the Lord thy God in vain".to_string(),
+        "Remember the sabbath day, to keep it holy".to_string(),
+        "Honour thy father and thy mother".to_string(),
+        "Thou shalt not kill".to_string(),
+        "Thou shalt not commit adultery".to_string(),
+        "Thou shalt not steal".to_string(),
+        "Thou shalt not bear false witness against thy neighbour".to_string(),
+        "Thou shalt not covet thy neighbour's house".to_string(),
+        "Thou shalt not covet thy neighbour's wife, nor his manservant, nor his maidservant, nor his ox, nor his ass, nor any thing that is thy neighbour's".to_string(),
+    ];
+        let agreement = _create_new_agreement(terms, String::from("God"));
+        dbg!(agreement);
+    }
+    #[test]
+    fn _agree_to_agreement_works() {}
 }

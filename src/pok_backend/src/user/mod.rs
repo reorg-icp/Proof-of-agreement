@@ -2,9 +2,9 @@ use crate::agreement::{self, Agreement, ProofOfAgreement};
 use crate::signature::Signature;
 
 use candid::Principal;
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct User {
-    pub identity: Principal,
+    pub identity: String,
 }
 pub trait CreateAgreement {
     fn new_agreement(self, terms: Vec<String>, date: String, with_user: User) -> Agreement;
@@ -27,7 +27,7 @@ impl CreateAgreement for User {
 impl Agree for User {
     fn agree(self, mut agreement: Agreement) -> Agreement {
         let signature = Signature {
-            agrees_to: Box::new(agreement.clone()), // Assuming you have implemented Clone for Agreement
+            agrees_to: Box::new(agreement.clone()),
             value: String::from("here is my signature"),
         };
 
