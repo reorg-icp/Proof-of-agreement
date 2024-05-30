@@ -21,7 +21,7 @@ fn _create_new_agreement(terms: Vec<String>, with_user: String) -> Agreement {
         String::from("new date"),
         Principal::principal_to_user(with_user),
     );
-    creator.agree(agreement)
+    creator.automatic_agreement(agreement)
 }
 fn _agree_to_agreement(user: String, agreement: Agreement) -> Agreement {
     let agreeing_party = Principal::principal_to_user(user);
@@ -47,7 +47,8 @@ mod tests {
         "Thou shalt not covet thy neighbour's wife, nor his manservant, nor his maidservant, nor his ox, nor his ass, nor any thing that is thy neighbour's".to_string(),
     ];
         let agreement = _create_new_agreement(terms, String::from("God"));
-        dbg!(agreement);
+        let amschel_agrees = _agree_to_agreement(String::from("God"), agreement);
+        dbg!(amschel_agrees.proof_of_agreement);
     }
     #[test]
     fn _agree_to_agreement_works() {}

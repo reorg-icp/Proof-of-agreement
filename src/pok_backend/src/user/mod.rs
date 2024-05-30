@@ -11,6 +11,19 @@ pub trait CreateAgreement {
 }
 pub trait Agree {
     fn agree(self, agreement: Agreement) -> Agreement;
+    fn automatic_agreement(&self, mut agreement: Agreement) -> Agreement {
+        let signature = Signature {
+            agrees_to: Box::new(agreement.clone()),
+            value: String::from("here is my signature"),
+        };
+
+        let new_agreement = (Some(signature), None);
+        agreement.proof_of_agreement = Some(new_agreement.clone());
+        Agreement {
+            proof_of_agreement: Some(new_agreement),
+            ..agreement
+        }
+    }
 }
 impl CreateAgreement for User {
     fn new_agreement(self, terms: Vec<String>, date: String, with_user: User) -> Agreement {
