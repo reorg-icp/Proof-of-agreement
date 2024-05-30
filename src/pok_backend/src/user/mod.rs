@@ -10,7 +10,7 @@ pub trait CreateAgreement {
     fn new_agreement(self, terms: Vec<String>, date: String, with_user: User) -> Agreement;
 }
 pub trait Agree {
-    fn agree(agreement: Agreement) -> Agreement;
+    fn agree(self, agreement: Agreement) -> Agreement;
 }
 impl CreateAgreement for User {
     fn new_agreement(self, terms: Vec<String>, date: String, with_user: User) -> Agreement {
@@ -25,7 +25,7 @@ impl CreateAgreement for User {
 }
 
 impl Agree for User {
-    fn agree(mut agreement: Agreement) -> Agreement {
+    fn agree(self, mut agreement: Agreement) -> Agreement {
         let signature = Signature {
             agrees_to: Box::new(agreement.clone()), // Assuming you have implemented Clone for Agreement
             value: String::from("here is my signature"),
