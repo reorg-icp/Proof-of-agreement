@@ -12,6 +12,9 @@ pub trait CreateAgreement {
 pub trait Agree {
     fn agree(self, agreement: Agreement) -> Agreement;
     fn automatic_agreement(&self, mut agreement: Agreement) -> Agreement {
+
+        //private key should be created from the user identity and the agreement and a cobination of other factors and then we sign the contract to get a signature
+
         let signature = Signature {
             agrees_to: Box::new(agreement.clone()),
             value: String::from("here is my signature"),
@@ -39,9 +42,10 @@ impl CreateAgreement for User {
 
 impl Agree for User {
     fn agree(self, mut agreement: Agreement) -> Agreement {
+                //private key should be created from the user identity and the agreement and a cobination of other factors and then we sign the contract to get a signature
         let signature = Signature {
             agrees_to: Box::new(agreement.clone()),
-            value: String::from("here is my signature"),
+            value: String::from("I solely and independently agree on this"),
         };
 
         if let Some((first_sig_opt, second_sig_opt)) = &mut agreement.proof_of_agreement {
