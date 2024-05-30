@@ -23,3 +23,7 @@ fn _create_new_agreement(terms: Vec<String>, with_user: Principal) -> Agreement 
     );
     creator.agree(agreement)
 }
+fn _agree_to_agreement(user: Principal, agreement: Agreement) -> Agreement {
+    let agreeing_party = Principal::principal_to_user(user);
+    agreeing_party.agree(agreement)
+}
