@@ -4,6 +4,7 @@ use helpers::ToUser;
 use user::{Agree, CreateAgreement, User};
 mod agreement;
 mod helpers;
+mod lamport;
 mod signature;
 mod user;
 
