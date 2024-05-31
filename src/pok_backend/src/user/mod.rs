@@ -2,17 +2,17 @@ use crate::agreement::{self, Agreement, ProofOfAgreement};
 use crate::signature::Signature;
 
 use candid::Principal;
+use chrono::{DateTime, Utc};
 #[derive(Clone, Debug)]
 pub struct User {
     pub identity: String,
 }
 pub trait CreateAgreement {
-    fn new_agreement(self, terms: Vec<String>, date: String, with_user: User) -> Agreement;
+    fn new_agreement(self, terms: Vec<String>, date: DateTime<Utc>, with_user: User) -> Agreement;
 }
 pub trait Agree {
     fn agree(self, agreement: Agreement) -> Agreement;
     fn automatic_agreement(&self, mut agreement: Agreement) -> Agreement {
-
         //private key should be created from the user identity and the agreement and a cobination of other factors and then we sign the contract to get a signature
 
         let signature = Signature {
@@ -29,7 +29,7 @@ pub trait Agree {
     }
 }
 impl CreateAgreement for User {
-    fn new_agreement(self, terms: Vec<String>, date: String, with_user: User) -> Agreement {
+    fn new_agreement(self, terms: Vec<String>, date: DateTime<Utc>, with_user: User) -> Agreement {
         Agreement {
             by_user: self,
             with_user,
@@ -42,7 +42,7 @@ impl CreateAgreement for User {
 
 impl Agree for User {
     fn agree(self, mut agreement: Agreement) -> Agreement {
-                //private key should be created from the user identity and the agreement and a cobination of other factors and then we sign the contract to get a signature
+        //private key should be created from the user identity and the agreement and a cobination of other factors and then we sign the contract to get a signature
         let signature = Signature {
             agrees_to: Box::new(agreement.clone()),
             value: String::from("I solely and independently agree on this"),

@@ -66,7 +66,7 @@ pub fn random_private_key(principal: String, agreement: Agreement, nounce: Strin
         hasher.update(&nounce);
         hasher.update(agreement.by_user.clone().identity);
         hasher.update(agreement.with_user.clone().identity);
-        hasher.update(agreement.date.as_str());
+        hasher.update(agreement.date.timestamp().to_string().as_str());
         for term in agreement.terms.iter() {
             hasher.update(term);
         }

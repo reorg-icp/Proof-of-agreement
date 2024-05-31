@@ -1,5 +1,6 @@
 use agreement::Agreement;
 use candid::Principal;
+use chrono::prelude::*;
 use helpers::ToUser;
 use user::{Agree, CreateAgreement, User};
 mod agreement;
@@ -17,11 +18,10 @@ impl ToUser for Principal {
 fn _create_new_agreement(terms: Vec<String>, with_user: String) -> Agreement {
     let creator = Principal::principal_to_user(String::from("aMSCHEL"));
 
-    let agreement = creator.clone().new_agreement(
-        terms,
-        String::from("new date"),
-        Principal::principal_to_user(with_user),
-    );
+    let agreement =
+        creator
+            .clone()
+            .new_agreement(terms, Utc::now(), Principal::principal_to_user(with_user));
     creator.automatic_agreement(agreement)
 }
 fn _agree_to_agreement(user: String, agreement: Agreement) -> Agreement {
