@@ -1,8 +1,10 @@
 use crate::agreement::{self, Agreement, ProofOfAgreement};
-use crate::signature::Signature;
+use crate::lamport::{hash, random_private_key, sign};
+use crate::signature::{self, Signature};
 
 use candid::Principal;
 use chrono::{DateTime, Utc};
+use sha2::{Digest, Sha256};
 #[derive(Clone, Debug)]
 pub struct User {
     pub identity: String,
@@ -14,17 +16,27 @@ pub trait Agree {
     fn agree(self, agreement: Agreement) -> Agreement;
     fn automatic_agreement(&self, mut agreement: Agreement) -> Agreement {
         //private key should be created from the user identity and the agreement and a cobination of other factors and then we sign the contract to get a signature
-
+        let privateKey = random_private_key(
+            agreement.clone().by_user.identity,
+            agreement.clone(),
+            String::from("example nounce"),
+        );
+        let mut terms_string: String = String::new();
+        for term in agreement.clone().terms.iter() {
+            terms_string.push_str(term);
+        }
+        let generated_signature = sign(hash(&terms_string), &privateKey);
+        //private key should be created from the user identity and the agreement and a cobination of other factors and then we sign the contract to get a signature
         let signature = Signature {
             agrees_to: Box::new(agreement.clone()),
-            value: String::from("here is my signature"),
+            value: generated_signature,
         };
 
         let new_agreement = (Some(signature), None);
         agreement.proof_of_agreement = Some(new_agreement.clone());
         Agreement {
             proof_of_agreement: Some(new_agreement),
-            ..agreement
+            ..agreement.clone()
         }
     }
 }
@@ -42,13 +54,23 @@ impl CreateAgreement for User {
 
 impl Agree for User {
     fn agree(self, mut agreement: Agreement) -> Agreement {
+        let privateKey = random_private_key(
+            self.identity,
+            agreement.clone(),
+            String::from("example nounce"),
+        );
+        let mut terms_string: String = String::new();
+        for term in agreement.clone().terms.iter() {
+            terms_string.push_str(term);
+        }
+        let generated_signature = sign(hash(&terms_string), &privateKey);
         //private key should be created from the user identity and the agreement and a cobination of other factors and then we sign the contract to get a signature
         let signature = Signature {
             agrees_to: Box::new(agreement.clone()),
-            value: String::from("I solely and independently agree on this"),
+            value: generated_signature,
         };
 
-        if let Some((first_sig_opt, second_sig_opt)) = &mut agreement.proof_of_agreement {
+        if let Some((first_sig_opt, second_sig_opt)) = &mut agreement.clone().proof_of_agreement {
             match first_sig_opt {
                 Some(_) => {
                     let new_agreement = (first_sig_opt.take(), Some(signature));

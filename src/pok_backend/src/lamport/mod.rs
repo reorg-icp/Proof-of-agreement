@@ -13,6 +13,7 @@ pub struct PrivateKey {
 pub struct PublicKey {
     key_pairs: Vec<(String, String)>,
 }
+#[derive(Clone, Debug)]
 
 pub struct Signature {
     signatures: Vec<String>,
