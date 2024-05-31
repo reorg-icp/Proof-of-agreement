@@ -54,3 +54,10 @@ mod tests {
     #[test]
     fn _agree_to_agreement_works() {}
 }
+
+// Internet computer functions here
+#[ic_cdk::query]
+fn check_status() -> String {
+    String::from("Proof of agreement is in a great working condition")
+}
+ic_cdk::export_candid!();
