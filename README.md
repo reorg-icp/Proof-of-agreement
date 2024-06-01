@@ -1,5 +1,5 @@
-```markdown
-# Secure Agreement System with Lamport Signatures for DAOs and Peer-to-Peer Contracts
+
+# Secure Agreement System with improved  Lamport Signatures for DAOs and Peer-to-Peer Contracts
 
 ## Overview
 
@@ -41,4 +41,3 @@ This project provides a decentralized system for creating, signing, and verifyin
 ## Conclusion
 
 This system offers a robust and secure method for creating, signing, and verifying agreements within DAOs. By leveraging the strengths of Lamport signatures and blockchain technology, it ensures transparency, security, and immutability, making it an ideal solution for decentralized governance and decision-making.
-```
