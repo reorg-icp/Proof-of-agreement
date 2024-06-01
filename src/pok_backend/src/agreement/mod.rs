@@ -31,6 +31,6 @@ impl Storable for Agreement {
 }
 
 impl BoundedStorable for Agreement {
-    const MAX_SIZE: u32 = 20024;
+    const MAX_SIZE: u32 = 200000;
     const IS_FIXED_SIZE: bool = false;
 }

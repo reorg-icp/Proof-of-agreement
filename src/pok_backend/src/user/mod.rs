@@ -12,7 +12,6 @@ use sha2::{Digest, Sha256};
 #[derive(candid::CandidType, Clone, Serialize, Deserialize, Debug)]
 pub struct User {
     pub identity: String,
-    pub agreements: Vec<u64>,
 }
 
 impl Storable for User {
@@ -31,8 +30,14 @@ impl BoundedStorable for User {
 }
 
 pub trait CreateAgreement {
-    fn new_agreement(self, terms: Vec<String>, date: String, with_user: User, id: u64)
-        -> Agreement;
+    fn new_agreement(
+        self,
+        terms: Vec<String>,
+        date: String,
+        with_user: User,
+        by_user: User,
+        id: u64,
+    ) -> Agreement;
 }
 pub trait Agree {
     fn agree(self, agreement: Agreement) -> Agreement;
@@ -57,6 +62,7 @@ pub trait Agree {
         Agreement {
             proof_of_agreement: Some(new_agreement),
             public_keys: Some(new_public__key_field),
+
             ..agreement.clone()
         }
     }
@@ -67,10 +73,11 @@ impl CreateAgreement for User {
         terms: Vec<String>,
         date: String,
         with_user: User,
+        by_user: User,
         id: u64,
     ) -> Agreement {
         Agreement {
-            by_user: self,
+            by_user,
             with_user,
             terms,
             date,

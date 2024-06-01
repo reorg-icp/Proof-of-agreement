@@ -4,16 +4,23 @@ type Agreement = record {
   date : text;
   proof_of_agreement : opt record { opt Signature_1; opt Signature_1 };
   by_user : User;
+  public_keys : opt record { opt PublicKey; opt PublicKey };
   with_user : User;
 };
 type Error = variant { NotFound : record { msg : text } };
+type PublicKey = record { key_pairs : vec record { text; text } };
 type Result = variant { Ok : Agreement; Err : Error };
+type Result_1 = variant { Ok : vec Agreement; Err : Error };
+type Result_2 = variant { Ok : bool; Err : Error };
 type Signature = record { signatures : vec text };
 type Signature_1 = record { value : Signature; agrees_to : Agreement };
-type User = record { agreements : vec nat64; identity : text };
+type User = record { identity : text };
 service : {
-  agree_to : (Agreement) -> (Result);
+  agree_to : (nat64) -> (Result);
   check_status : () -> (text) query;
+  get_my_agreements : (nat64) -> (Result_1) query;
+  get_single_agreement : (nat64) -> (Result) query;
   initiate_agreement : (vec text, text) -> (Result);
   signup_user : () -> (text);
+  verify_signatures : (nat64) -> (Result_2);
 }

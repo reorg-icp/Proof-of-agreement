@@ -37,18 +37,18 @@ thread_local! {
 
         static AGREEMENTS: RefCell<BTreeMap<u64,Agreement,Memory>> = RefCell::new(
         BTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))),
         )
 
 
 
     );
         static USER_ID_COUNTER: RefCell<IdCell> = RefCell::new(
-        IdCell::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))), 0)
+        IdCell::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(2))), 0)
             .expect("Cannot create a  User counter")
     );
     static AGREEMENT_ID_COUNTER: RefCell<IdCell> = RefCell::new(
-        IdCell::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))), 0)
+        IdCell::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(3))), 0)
             .expect("Cannot create an Agreements  counter")
     );
 
@@ -57,20 +57,23 @@ thread_local! {
 
 impl ToUser for Principal {
     fn principal_to_user(name: String) -> User {
-        User {
-            identity: name,
-            agreements: vec![],
-        }
+        User { identity: name }
     }
 }
 
-fn _create_new_agreement(terms: Vec<String>, with_user: String, id: u64) -> Agreement {
+fn _create_new_agreement(
+    terms: Vec<String>,
+    with_user: String,
+    id: u64,
+    by_user: String,
+) -> Agreement {
     let creator = Principal::principal_to_user(String::from("aMSCHEL"));
 
     let agreement = creator.clone().new_agreement(
         terms,
         time().to_string(),
         Principal::principal_to_user(with_user),
+        Principal::principal_to_user(by_user),
         id,
     );
     creator.automatic_agreement(agreement)
@@ -98,7 +101,8 @@ mod tests {
         "Thou shalt not covet thy neighbour's house".to_string(),
         "Thou shalt not covet thy neighbour's wife, nor his manservant, nor his maidservant, nor his ox, nor his ass, nor any thing that is thy neighbour's".to_string(),
     ];
-        let agreement = _create_new_agreement(terms, String::from("God"), 1);
+        let agreement =
+            _create_new_agreement(terms, String::from("God"), 1, String::from("the heck"));
         let amschel_agrees = _agree_to_agreement(String::from("God"), agreement);
         dbg!(amschel_agrees.proof_of_agreement.unwrap().0.unwrap().value);
     }
@@ -122,7 +126,7 @@ fn initiate_agreement(terms: Vec<String>, with_user: String) -> Result<Agreement
         counter_value
     });
 
-    let agreement = _create_new_agreement(terms, with_user, id);
+    let agreement = _create_new_agreement(terms, with_user, id, ic_cdk::caller().to_string());
 
     match AGREEMENTS.with(|db| db.borrow_mut().insert(id, agreement.clone())) {
         Some(_) => {
@@ -149,7 +153,6 @@ fn signup_user() -> String {
         counter_value
     });
     let user = User {
-        agreements: vec![],
         identity: ic_cdk::caller().to_string(),
     };
 
@@ -245,25 +248,31 @@ fn verify_signatures(agreement_id: u64) -> Result<bool, Error> {
 }
 
 #[ic_cdk::query]
-
-fn get_my_agreements(user: u64) -> Result<Vec<Agreement>, Error> {
-    let mut myagreements: Vec<Agreement> = vec![];
-    match USERS.with(|storage| storage.borrow_mut().get(&user)) {
+fn get_my_agreements(user_id: u64) -> Result<Vec<Agreement>, Error> {
+    let mut my_agreements: Vec<Agreement> = vec![];
+    // Borrow the USERS storage and get the user by ID
+    match USERS.with(|storage| storage.borrow().get(&user_id)) {
         Some(user) => {
-            let all_agreements: Vec<_> =
-                AGREEMENTS.with(|storage| storage.borrow_mut().iter().collect());
-            for agreement in all_agreements {
-                if agreement.1.clone().with_user.identity == user.identity
-                    || agreement.1.clone().by_user.identity == user.identity
-                {
-                    myagreements.push(agreement.1.clone());
+            // Borrow the AGREEMENTS storage and collect all agreements
+            let all_agreements: Vec<(u64, Agreement)> =
+                AGREEMENTS.with(|storage| storage.borrow().iter().collect());
+
+            // Iterate through each agreement
+            for (id, agreement) in all_agreements.clone() {
+                // Debugging: print the identities being compared
+
+                if agreement.with_user.identity.trim() == user.identity.trim() {
+                    my_agreements.push(agreement.clone())
+                }
+                if agreement.by_user.identity.trim() == user.identity.trim() {
+                    my_agreements.push(agreement)
                 }
             }
 
-            Ok(myagreements)
+            Ok(my_agreements)
         }
         None => Err(Error::NotFound {
-            msg: format!("That user wasn't found sorry "),
+            msg: format!("User with ID {} wasn't found.", user_id),
         }),
     }
 }
