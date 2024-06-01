@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
-use crate::signature::Signature;
 use crate::user::User;
+use crate::{lamport::PublicKey, signature::Signature};
 use candid::{Decode, Encode};
 use chrono::prelude::*;
 use ic_stable_structures::{BoundedStorable, Storable};
@@ -13,10 +13,12 @@ pub struct Agreement {
     pub with_user: User,
     pub date: String,
     pub proof_of_agreement: Option<ProofOfAgreement>,
+    pub public_keys: Option<PublicKeys>,
     pub id: u64,
 }
 
 pub type ProofOfAgreement = (Option<Signature>, Option<Signature>);
+pub type PublicKeys = (Option<PublicKey>, Option<PublicKey>);
 
 impl Storable for Agreement {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {

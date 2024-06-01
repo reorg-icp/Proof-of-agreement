@@ -9,7 +9,7 @@ const KEY_ELEMENT_SIZE: usize = 32;
 pub struct PrivateKey {
     key_pairs: Vec<(String, String)>,
 }
-
+#[derive(Clone, Debug, candid::CandidType, Serialize, Deserialize)]
 pub struct PublicKey {
     key_pairs: Vec<(String, String)>,
 }
