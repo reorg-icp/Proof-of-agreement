@@ -11,6 +11,7 @@ use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
     BTreeMap, Cell, DefaultMemoryImpl, Vec as VecStructure,
 };
+use lamport::{hash, verify};
 use user::{Agree, CreateAgreement, User};
 
 mod agreement;
@@ -160,11 +161,10 @@ fn signup_user() -> String {
 
 #[ic_cdk::update]
 
-fn agree_to(agreement: Agreement) -> Result<Agreement, Error> {
+fn agree_to(agreement_id: u64) -> Result<Agreement, Error> {
     //We are supposed to sign and store the update in stable storage
 
-    let initial_agreement =
-        AGREEMENTS.with(|storage| storage.borrow_mut().get(&agreement.clone().id));
+    let initial_agreement = AGREEMENTS.with(|storage| storage.borrow_mut().get(&agreement_id));
     match initial_agreement {
         Some(agreement) => {
             let signed_agreement =
@@ -195,6 +195,46 @@ fn agree_to(agreement: Agreement) -> Result<Agreement, Error> {
     }
 }
 
+#[ic_cdk::update]
+
+fn verify_signatures(agreement_id: u64) -> Result<bool, Error> {
+    let agreement = AGREEMENTS.with(|storage| storage.borrow_mut().get(&agreement_id));
+    match agreement {
+        Some(agreement) => {
+            //Reconstruct the message
+            let mut message: String = String::new();
+            for term in agreement.clone().terms.iter() {
+                message.push_str(term);
+            }
+            //extract the signatures and public keys and then verify
+
+            let signature1 = agreement
+                .clone()
+                .proof_of_agreement
+                .unwrap()
+                .0
+                .unwrap()
+                .value;
+            let signature2 = agreement
+                .clone()
+                .proof_of_agreement
+                .unwrap()
+                .1
+                .unwrap()
+                .value;
+            let key1 = agreement.clone().public_keys.unwrap().0.unwrap();
+            let key2 = agreement.clone().public_keys.unwrap().1.unwrap();
+            let signature_one_is_valid = verify(hash(&message.as_str()), &signature1, &key1);
+            let signature_two_is_valid = verify(hash(&message.as_str()), &signature2, &key2);
+            Ok(signature_one_is_valid && signature_two_is_valid)
+
+            //do something
+        }
+        None => Err(Error::NotFound {
+            msg: format!("That agreement was not found"),
+        }),
+    }
+}
 #[derive(candid::CandidType, Deserialize, Serialize, Debug)]
 enum Error {
     NotFound { msg: String },
