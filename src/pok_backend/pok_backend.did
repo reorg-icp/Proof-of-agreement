@@ -8,7 +8,6 @@ type Agreement = record {
 };
 type Error = variant { NotFound : record { msg : text } };
 type Result = variant { Ok : Agreement; Err : Error };
-type Result_1 = variant { Ok : User; Err : Error };
 type Signature = record { signatures : vec text };
 type Signature_1 = record { value : Signature; agrees_to : Agreement };
 type User = record { agreements : vec nat64; identity : text };
@@ -16,5 +15,5 @@ service : {
   agree_to : (Agreement) -> (Result);
   check_status : () -> (text) query;
   initiate_agreement : (vec text, text) -> (Result);
-  signup_user : () -> (Result_1);
+  signup_user : () -> (text);
 }

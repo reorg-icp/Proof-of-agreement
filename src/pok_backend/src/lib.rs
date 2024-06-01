@@ -6,6 +6,7 @@ use agreement::Agreement;
 use candid::Principal;
 use chrono::prelude::*;
 use helpers::ToUser;
+use ic_cdk::api::time;
 use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
     BTreeMap, Cell, DefaultMemoryImpl, Vec as VecStructure,
@@ -67,7 +68,7 @@ fn _create_new_agreement(terms: Vec<String>, with_user: String, id: u64) -> Agre
 
     let agreement = creator.clone().new_agreement(
         terms,
-        Utc::now().to_string(),
+        time().to_string(),
         Principal::principal_to_user(with_user),
         id,
     );
@@ -122,17 +123,25 @@ fn initiate_agreement(terms: Vec<String>, with_user: String) -> Result<Agreement
 
     let agreement = _create_new_agreement(terms, with_user, id);
 
-    match AGREEMENTS.with(|db| db.borrow_mut().insert(id, agreement)) {
-        Some(article) => Ok(article),
-        None => Err(Error::NotFound {
-            msg: format!("Could not initiate an agreement"),
-        }),
+    match AGREEMENTS.with(|db| db.borrow_mut().insert(id, agreement.clone())) {
+        Some(_) => {
+            let new_agreement = AGREEMENTS
+                .with(|storage| storage.borrow_mut().get(&agreement.clone().id))
+                .unwrap();
+            Ok(new_agreement)
+        }
+        None => {
+            let new_agreement = AGREEMENTS
+                .with(|storage| storage.borrow_mut().get(&agreement.clone().id))
+                .unwrap();
+            Ok(new_agreement)
+        }
     }
 }
 
 #[ic_cdk::update]
 
-fn signup_user() -> Result<User, Error> {
+fn signup_user() -> String {
     let id = USER_ID_COUNTER.with(|counter| {
         let counter_value = *counter.borrow().get();
         let _ = counter.borrow_mut().set(counter_value + 1);
@@ -143,11 +152,9 @@ fn signup_user() -> Result<User, Error> {
         identity: ic_cdk::caller().to_string(),
     };
 
-    match USERS.with(|db| db.borrow_mut().insert(id, user)) {
-        Some(article) => Ok(article),
-        None => Err(Error::NotFound {
-            msg: format!("Could not signup a user"),
-        }),
+    match USERS.with(|db| db.borrow_mut().insert(id, user.clone())) {
+        Some(_) => format!("User {} created", user.identity),
+        None => format!("User {} created", user.identity),
     }
 }
 
@@ -155,16 +162,35 @@ fn signup_user() -> Result<User, Error> {
 
 fn agree_to(agreement: Agreement) -> Result<Agreement, Error> {
     //We are supposed to sign and store the update in stable storage
-    let signed_agreement = _agree_to_agreement(ic_cdk::caller().to_string(), agreement.clone());
 
-    match AGREEMENTS.with(|storage| {
-        storage
-            .borrow_mut()
-            .insert(agreement.clone().id, signed_agreement)
-    }) {
-        Some(agreement) => Ok(agreement),
+    let initial_agreement =
+        AGREEMENTS.with(|storage| storage.borrow_mut().get(&agreement.clone().id));
+    match initial_agreement {
+        Some(agreement) => {
+            let signed_agreement =
+                _agree_to_agreement(ic_cdk::caller().to_string(), agreement.clone());
+
+            match AGREEMENTS.with(|storage| {
+                storage
+                    .borrow_mut()
+                    .insert(agreement.clone().id, signed_agreement)
+            }) {
+                Some(agreement) => {
+                    let new_agreement = AGREEMENTS
+                        .with(|storage| storage.borrow_mut().get(&agreement.clone().id))
+                        .unwrap();
+                    Ok(new_agreement)
+                }
+                None => {
+                    let new_agreement = AGREEMENTS
+                        .with(|storage| storage.borrow_mut().get(&agreement.clone().id))
+                        .unwrap();
+                    Ok(new_agreement)
+                }
+            }
+        }
         None => Err(Error::NotFound {
-            msg: format!("error"),
+            msg: format!("That agreement was not found"),
         }),
     }
 }
