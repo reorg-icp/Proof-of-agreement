@@ -166,6 +166,7 @@ fn agree_to(agreement_id: u64) -> Result<Agreement, Error> {
 
     let initial_agreement = AGREEMENTS.with(|storage| storage.borrow_mut().get(&agreement_id));
     match initial_agreement {
+        //say that the agreement was not found
         Some(agreement) => {
             let signed_agreement =
                 _agree_to_agreement(ic_cdk::caller().to_string(), agreement.clone());
@@ -206,7 +207,14 @@ fn verify_signatures(agreement_id: u64) -> Result<bool, Error> {
             for term in agreement.clone().terms.iter() {
                 message.push_str(term);
             }
-            //extract the signatures and public keys and then verify
+
+            if agreement.clone().proof_of_agreement.unwrap().0.is_none()
+                || agreement.clone().proof_of_agreement.unwrap().1.is_none()
+            {
+                return   Err(Error::NotFound {
+                    msg: format!("The agreement has only one signature hence it cannot be verified since the other person has not signed"),
+                });
+            }
 
             let signature1 = agreement
                 .clone()
@@ -232,6 +240,41 @@ fn verify_signatures(agreement_id: u64) -> Result<bool, Error> {
         }
         None => Err(Error::NotFound {
             msg: format!("That agreement was not found"),
+        }),
+    }
+}
+
+#[ic_cdk::query]
+
+fn get_my_agreements(user: u64) -> Result<Vec<Agreement>, Error> {
+    let mut myagreements: Vec<Agreement> = vec![];
+    match USERS.with(|storage| storage.borrow_mut().get(&user)) {
+        Some(user) => {
+            let all_agreements: Vec<_> =
+                AGREEMENTS.with(|storage| storage.borrow_mut().iter().collect());
+            for agreement in all_agreements {
+                if agreement.1.clone().with_user.identity == user.identity
+                    || agreement.1.clone().by_user.identity == user.identity
+                {
+                    myagreements.push(agreement.1.clone());
+                }
+            }
+
+            Ok(myagreements)
+        }
+        None => Err(Error::NotFound {
+            msg: format!("That user wasn't found sorry "),
+        }),
+    }
+}
+
+#[ic_cdk::query]
+fn get_single_agreement(agreement_id: u64) -> Result<Agreement, Error> {
+    let agreement = AGREEMENTS.with(|storage| storage.borrow_mut().get(&agreement_id));
+    match agreement {
+        Some(agreement) => Ok(agreement),
+        None => Err(Error::NotFound {
+            msg: format!("That agreement  wasn't found sorry "),
         }),
     }
 }
