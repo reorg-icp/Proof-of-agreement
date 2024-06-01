@@ -57,7 +57,7 @@ impl Signature {
 //     }
 // }
 
-pub fn random_private_key(principal: String, agreement: Agreement, nounce: String) -> PrivateKey {
+pub fn random_private_key(principal: String, agreement: Agreement) -> PrivateKey {
     let hashed_principal = hash(&principal);
 
     let mut private_key: Vec<(String, String)> = Vec::with_capacity(KEY_SIZE);
@@ -65,7 +65,7 @@ pub fn random_private_key(principal: String, agreement: Agreement, nounce: Strin
 
     for i in 0..KEY_SIZE {
         hasher.update(&hashed_principal);
-        hasher.update(&nounce);
+
         hasher.update(agreement.by_user.clone().identity);
         hasher.update(agreement.with_user.clone().identity);
         hasher.update(agreement.date.as_str());
@@ -208,11 +208,7 @@ mod tests {
     ];
         let agreement = _create_new_agreement(terms, String::from("God"), 1);
 
-        let private_key = random_private_key(
-            String::from("amschel"),
-            agreement,
-            String::from("My secret"),
-        );
+        let private_key = random_private_key(String::from("amschel"), agreement);
 
         let public_key = create_public_key(&private_key);
         let message_hash = hash("Hello, world!");

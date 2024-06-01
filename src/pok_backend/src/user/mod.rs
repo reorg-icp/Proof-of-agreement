@@ -38,11 +38,7 @@ pub trait Agree {
     fn agree(self, agreement: Agreement) -> Agreement;
     fn automatic_agreement(&self, mut agreement: Agreement) -> Agreement {
         //private key should be created from the user identity and the agreement and a cobination of other factors and then we sign the contract to get a signature
-        let privateKey = random_private_key(
-            agreement.clone().by_user.identity,
-            agreement.clone(),
-            String::from("example nounce"),
-        );
+        let privateKey = random_private_key(agreement.clone().by_user.identity, agreement.clone());
         let mut terms_string: String = String::new();
         for term in agreement.clone().terms.iter() {
             terms_string.push_str(term);
@@ -83,11 +79,7 @@ impl CreateAgreement for User {
 
 impl Agree for User {
     fn agree(self, mut agreement: Agreement) -> Agreement {
-        let privateKey = random_private_key(
-            self.identity,
-            agreement.clone(),
-            String::from("example nounce"),
-        );
+        let privateKey = random_private_key(self.identity, agreement.clone());
         let mut terms_string: String = String::new();
         for term in agreement.clone().terms.iter() {
             terms_string.push_str(term);
