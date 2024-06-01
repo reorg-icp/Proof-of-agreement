@@ -3,7 +3,7 @@
 
 ## Overview
 
-This project provides a decentralized system for creating, signing, and verifying agreements using cryptographically secure Lamport signatures. The system is designed to be used within Decentralized Autonomous Organizations (DAOs) to ensure transparency, security, and immutability of agreements. Agreements are stored on the blockchain, making them tamper-proof and publicly verifiable.
+This project provides a decentralized system for creating, signing, and verifying agreements using cryptographically secure Lamport signatures. The system is designed to be used within Decentralized Autonomous Organizations (DAOs) and P2P parties to ensure transparency, security, and immutability of agreements. Agreements are stored on the blockchain, making them tamper-proof and publicly verifiable.
 
 ## Key Features
 
