@@ -23,7 +23,35 @@ type Memory = VirtualMemory<DefaultMemoryImpl>;
 
 type IdCell = Cell<u64, Memory>;
 
-thread_local! {}
+thread_local! {
+        static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+        RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+
+    static USERS: RefCell<BTreeMap<u64,User,Memory>> = RefCell::new(
+        BTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+        )
+    );
+
+        static AGREEMENTS: RefCell<BTreeMap<u64,Agreement,Memory>> = RefCell::new(
+        BTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+        )
+
+
+
+    );
+        static USER_ID_COUNTER: RefCell<IdCell> = RefCell::new(
+        IdCell::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))), 0)
+            .expect("Cannot create a  User counter")
+    );
+    static AGREEMENT_ID_COUNTER: RefCell<IdCell> = RefCell::new(
+        IdCell::init(MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))), 0)
+            .expect("Cannot create an Agreements  counter")
+    );
+
+
+}
 
 impl ToUser for Principal {
     fn principal_to_user(name: String) -> User {
@@ -39,7 +67,7 @@ fn _create_new_agreement(terms: Vec<String>, with_user: String, id: u64) -> Agre
 
     let agreement = creator.clone().new_agreement(
         terms,
-        Utc::now(),
+        Utc::now().to_string(),
         Principal::principal_to_user(with_user),
         id,
     );

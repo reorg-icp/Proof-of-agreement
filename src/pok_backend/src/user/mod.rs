@@ -15,8 +15,6 @@ pub struct User {
     pub agreements: Vec<u64>,
 }
 
-//implement Storable and Boundable storable for the User type
-
 impl Storable for User {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         Cow::Owned(Encode!(self).unwrap())
@@ -33,13 +31,8 @@ impl BoundedStorable for User {
 }
 
 pub trait CreateAgreement {
-    fn new_agreement(
-        self,
-        terms: Vec<String>,
-        date: DateTime<Utc>,
-        with_user: User,
-        id: u64,
-    ) -> Agreement;
+    fn new_agreement(self, terms: Vec<String>, date: String, with_user: User, id: u64)
+        -> Agreement;
 }
 pub trait Agree {
     fn agree(self, agreement: Agreement) -> Agreement;
@@ -73,7 +66,7 @@ impl CreateAgreement for User {
     fn new_agreement(
         self,
         terms: Vec<String>,
-        date: DateTime<Utc>,
+        date: String,
         with_user: User,
         id: u64,
     ) -> Agreement {
