@@ -205,7 +205,7 @@ mod tests {
         "Thou shalt not covet thy neighbour's house".to_string(),
         "Thou shalt not covet thy neighbour's wife, nor his manservant, nor his maidservant, nor his ox, nor his ass, nor any thing that is thy neighbour's".to_string(),
     ];
-        let agreement = _create_new_agreement(terms, String::from("God"));
+        let agreement = _create_new_agreement(terms, String::from("God"), 1);
 
         let private_key = random_private_key(
             String::from("amschel"),

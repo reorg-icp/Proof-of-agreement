@@ -9,5 +9,6 @@ pub struct Agreement {
     pub with_user: User,
     pub date: DateTime<Utc>,
     pub proof_of_agreement: Option<ProofOfAgreement>,
+    pub id: u64,
 }
 pub type ProofOfAgreement = (Option<Signature>, Option<Signature>);

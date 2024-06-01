@@ -8,9 +8,16 @@ use sha2::{Digest, Sha256};
 #[derive(Clone, Debug)]
 pub struct User {
     pub identity: String,
+    pub agreements: Vec<u64>,
 }
 pub trait CreateAgreement {
-    fn new_agreement(self, terms: Vec<String>, date: DateTime<Utc>, with_user: User) -> Agreement;
+    fn new_agreement(
+        self,
+        terms: Vec<String>,
+        date: DateTime<Utc>,
+        with_user: User,
+        id: u64,
+    ) -> Agreement;
 }
 pub trait Agree {
     fn agree(self, agreement: Agreement) -> Agreement;
@@ -41,12 +48,19 @@ pub trait Agree {
     }
 }
 impl CreateAgreement for User {
-    fn new_agreement(self, terms: Vec<String>, date: DateTime<Utc>, with_user: User) -> Agreement {
+    fn new_agreement(
+        self,
+        terms: Vec<String>,
+        date: DateTime<Utc>,
+        with_user: User,
+        id: u64,
+    ) -> Agreement {
         Agreement {
             by_user: self,
             with_user,
             terms,
             date,
+            id,
             proof_of_agreement: None,
         }
     }

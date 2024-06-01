@@ -28,8 +28,8 @@ This project provides a decentralized system for creating, signing, and verifyin
 
 - **Retrieve Agreement**: The agreement is retrieved from the blockchain, including its content, signatures, and public keys.
 - **Extract Data**: Extract the signatures, public keys, and original agreement content.
-- **Regenerate Public Keys**: Regenerate the private keys deterministically using the internet identities and agreement content, then derive the corresponding public keys.
-- **Signature Verification**: Verify the signatures using the extracted public keys against the agreement content. Ensure all parts of the signatures match the corresponding parts of the public keys.
+
+- **Signature Verification**: Verify the signatures using the extracted public keys against the agreement content. Ensure all parts of the signatures match the corresponding parts of the public keys. This is done automatically through our verification module.
 
 ### Use Case: DAO Workflow
 

@@ -2,7 +2,12 @@ use agreement::Agreement;
 use candid::Principal;
 use chrono::prelude::*;
 use helpers::ToUser;
+use ic_stable_structures::{
+    memory_manager::{MemoryId, MemoryManager, VirtualMemory},
+    BTreeMap, Cell, DefaultMemoryImpl, Vec as VecStructure,
+};
 use user::{Agree, CreateAgreement, User};
+
 mod agreement;
 mod helpers;
 mod lamport;
@@ -11,17 +16,22 @@ mod user;
 
 impl ToUser for Principal {
     fn principal_to_user(name: String) -> User {
-        User { identity: name }
+        User {
+            identity: name,
+            agreements: vec![],
+        }
     }
 }
 
-fn _create_new_agreement(terms: Vec<String>, with_user: String) -> Agreement {
+fn _create_new_agreement(terms: Vec<String>, with_user: String, id: u64) -> Agreement {
     let creator = Principal::principal_to_user(String::from("aMSCHEL"));
 
-    let agreement =
-        creator
-            .clone()
-            .new_agreement(terms, Utc::now(), Principal::principal_to_user(with_user));
+    let agreement = creator.clone().new_agreement(
+        terms,
+        Utc::now(),
+        Principal::principal_to_user(with_user),
+        id,
+    );
     creator.automatic_agreement(agreement)
 }
 fn _agree_to_agreement(user: String, agreement: Agreement) -> Agreement {
@@ -47,7 +57,7 @@ mod tests {
         "Thou shalt not covet thy neighbour's house".to_string(),
         "Thou shalt not covet thy neighbour's wife, nor his manservant, nor his maidservant, nor his ox, nor his ass, nor any thing that is thy neighbour's".to_string(),
     ];
-        let agreement = _create_new_agreement(terms, String::from("God"));
+        let agreement = _create_new_agreement(terms, String::from("God"), 1);
         let amschel_agrees = _agree_to_agreement(String::from("God"), agreement);
         dbg!(amschel_agrees.proof_of_agreement.unwrap().0.unwrap().value);
     }
@@ -56,6 +66,7 @@ mod tests {
 }
 
 // Internet computer functions here
+
 #[ic_cdk::query]
 fn check_status() -> String {
     String::from("Proof of agreement is in a great working condition")
