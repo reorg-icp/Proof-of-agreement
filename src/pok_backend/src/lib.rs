@@ -108,6 +108,70 @@ mod tests {
 
 #[ic_cdk::query]
 fn check_status() -> String {
-    String::from("Proof of agreement is in a great working condition")
+    String::from("We are live")
 }
+
+#[ic_cdk::update]
+
+fn initiate_agreement(terms: Vec<String>, with_user: String) -> Result<Agreement, Error> {
+    let id = AGREEMENT_ID_COUNTER.with(|counter| {
+        let counter_value = *counter.borrow().get();
+        let _ = counter.borrow_mut().set(counter_value + 1);
+        counter_value
+    });
+
+    let agreement = _create_new_agreement(terms, with_user, id);
+
+    match AGREEMENTS.with(|db| db.borrow_mut().insert(id, agreement)) {
+        Some(article) => Ok(article),
+        None => Err(Error::NotFound {
+            msg: format!("Could not initiate an agreement"),
+        }),
+    }
+}
+
+#[ic_cdk::update]
+
+fn signup_user() -> Result<User, Error> {
+    let id = USER_ID_COUNTER.with(|counter| {
+        let counter_value = *counter.borrow().get();
+        let _ = counter.borrow_mut().set(counter_value + 1);
+        counter_value
+    });
+    let user = User {
+        agreements: vec![],
+        identity: ic_cdk::caller().to_string(),
+    };
+
+    match USERS.with(|db| db.borrow_mut().insert(id, user)) {
+        Some(article) => Ok(article),
+        None => Err(Error::NotFound {
+            msg: format!("Could not signup a user"),
+        }),
+    }
+}
+
+#[ic_cdk::update]
+
+fn agree_to(agreement: Agreement) -> Result<Agreement, Error> {
+    //We are supposed to sign and store the update in stable storage
+    let signed_agreement = _agree_to_agreement(ic_cdk::caller().to_string(), agreement.clone());
+
+    match AGREEMENTS.with(|storage| {
+        storage
+            .borrow_mut()
+            .insert(agreement.clone().id, signed_agreement)
+    }) {
+        Some(agreement) => Ok(agreement),
+        None => Err(Error::NotFound {
+            msg: format!("error"),
+        }),
+    }
+}
+
+#[derive(candid::CandidType, Deserialize, Serialize, Debug)]
+enum Error {
+    NotFound { msg: String },
+}
+
 ic_cdk::export_candid!();
