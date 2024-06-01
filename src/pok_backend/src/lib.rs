@@ -1,3 +1,7 @@
+#[macro_use]
+extern crate serde;
+use std::cell::RefCell;
+
 use agreement::Agreement;
 use candid::Principal;
 use chrono::prelude::*;
@@ -13,6 +17,13 @@ mod helpers;
 mod lamport;
 mod signature;
 mod user;
+
+//Memory implementations
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
+type IdCell = Cell<u64, Memory>;
+
+thread_local! {}
 
 impl ToUser for Principal {
     fn principal_to_user(name: String) -> User {

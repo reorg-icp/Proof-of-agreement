@@ -1,15 +1,37 @@
+use std::borrow::Cow;
+
 use crate::agreement::{self, Agreement, ProofOfAgreement};
 use crate::lamport::{hash, random_private_key, sign};
 use crate::signature::{self, Signature};
 
-use candid::Principal;
+use candid::{Decode, Encode, Principal};
 use chrono::{DateTime, Utc};
+use ic_stable_structures::{BoundedStorable, Storable};
 use sha2::{Digest, Sha256};
-#[derive(Clone, Debug)]
+// #[derive(Clone, Debug)]
+#[derive(candid::CandidType, Clone, Serialize, Deserialize, Debug)]
 pub struct User {
     pub identity: String,
     pub agreements: Vec<u64>,
 }
+
+//implement Storable and Boundable storable for the User type
+
+impl Storable for User {
+    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+        Cow::Owned(Encode!(self).unwrap())
+    }
+
+    fn from_bytes(bytes: std::borrow::Cow<[u8]>) -> Self {
+        Decode!(bytes.as_ref(), Self).unwrap()
+    }
+}
+
+impl BoundedStorable for User {
+    const MAX_SIZE: u32 = 1024;
+    const IS_FIXED_SIZE: bool = false;
+}
+
 pub trait CreateAgreement {
     fn new_agreement(
         self,
