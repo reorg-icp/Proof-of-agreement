@@ -72,3 +72,10 @@ This system offers a robust and secure method for creating, signing, and verifyi
     npm run local
     ```
 3. Go to the URL provided in the terminal output to interact with the canister smart contracts through your browser.
+
+
+### More ideas
+
+   NFTs for Contract Ownership: When a contract is signed, mint a unique NFT (non-fungible token) representing that contract. The NFT can be stored in the parties’ wallets, serving as proof of ownership. Any attempt to steal the contract would involve stealing the associated NFT as well.
+
+Secure Identity Verification: Your Proof of Identity protocol is crucial. Consider integrating biometric authentication (such as fingerprint or facial recognition) for identity verification. This adds an extra layer of confidence in the parties’ identities.

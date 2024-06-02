@@ -5,10 +5,17 @@
   },
   "name": "pok",
   "scripts": {
-  "local":"chmod +x ./did.sh && ./did.sh && dfx generate pok_backend && dfx deploy -y"
+    "local": "chmod +x ./did.sh && ./did.sh && dfx generate pok_backend && dfx deploy -y"
   },
   "type": "module",
   "workspaces": [
     "src/pok_frontend"
-  ]
+  ],
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "@fontsource/roboto": "^5.0.13",
+    "@mui/icons-material": "^5.15.19",
+    "@mui/material": "^5.15.19"
+  }
 }

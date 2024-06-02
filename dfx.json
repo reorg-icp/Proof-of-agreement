@@ -4,6 +4,16 @@
       "candid": "src/pok_backend/pok_backend.did",
       "package": "pok_backend",
       "type": "rust"
+    },
+     "frontend": {
+      "dependencies": [
+        "pok_backend"
+      ],
+      "source": [
+        "src/frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "frontend"
     }
    
   },
